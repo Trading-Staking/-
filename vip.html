@@ -5,43 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <title>ChainMaster - VIP</title>
+    <title>Mi Web VIP</title>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(180deg, #006600 0%, #003300 100%);
+            background: linear-gradient(180deg, #020066 0%, #03002b 100%);
             color: white;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
-            position: relative;
-        }
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.3;
         }
         .container {
             max-width: 480px;
             margin: 0 auto;
             padding: 20px;
-            box-sizing: border-box;
-            min-height: calc(100vh - 70px);
-            position: relative;
-        }
-        .header {
             text-align: center;
-            margin: 20px 0;
-        }
-        .header img {
-            max-width: 150px;
-            height: auto;
-            border-radius: 10px;
         }
         .vip-panel {
             background: #006600;
@@ -49,10 +27,6 @@
             padding: 15px;
             margin: 20px 0;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            text-align: center;
-        }
-        .vip-panel p {
-            margin: 10px 0;
         }
         .vip-panel button {
             background: #00FFAA;
@@ -62,11 +36,7 @@
             color: white;
             font-size: 16px;
             cursor: pointer;
-            transition: background 0.3s;
             margin: 5px;
-        }
-        .vip-panel button:hover {
-            background: #00CC00;
         }
         .navbar {
             background: #003300;
@@ -75,267 +45,43 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            z-index: 1000;
             display: flex;
             justify-content: space-around;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
         }
         .navbar a {
             color: #00FFAA;
             text-decoration: none;
-            text-align: center;
             font-size: 12px;
-        }
-        .navbar a i {
-            display: block;
-            font-size: 20px;
-        }
-        .navbar a:hover {
-            color: #00CC00;
-        }
-        @media (max-width: 480px) {
-            .vip-panel button { font-size: 14px; padding: 8px 15px; }
-            .navbar a { font-size: 10px; }
         }
     </style>
 </head>
 <body>
-    <canvas id="particles"></canvas>
-
     <div class="container">
-        <div class="header">
-            <img src="https://chainmaster.srv754054.hstgr.cloud/assets/images/logo.png" alt="ChainMaster Logo" onerror="this.src='https://via.placeholder.com/150?text=ChainMaster+Logo';">
-        </div>
+        <h1>Bienvenido a Mi Web VIP</h1>
         <div class="vip-panel">
-            <h3 id="vipStatus">Cargando...</h3>
-            <button onclick="refreshUserData()">Refrescar Datos</button>
-            <button onclick="window.location.href='deposit.html'">Actualizar VIP</button>
-            <p>VIP 1: 13 USDT (2.5 USDT/día)</p>
-            <p>VIP 2: 39 USDT (7.5 USDT/día)</p>
-            <p>VIP 3: 97 USDT (18.6 USDT/día)</p>
-            <p>VIP 4: 291 USDT (59.9 USDT/día)</p>
-            <p>VIP 5: 582 USDT (111.9 USDT/día)</p>
-            <p>VIP 6: 1455 USDT (279.9 USDT/día)</p>
-            <p>VIP 7: 3492 USDT (671.5 USDT/día)</p>
-            <p>VIP 8: 6984 USDT (1342 USDT/día)</p>
-            <p>VIP 9: 14666 USDT (2820 USDT/día)</p>
-            <p>VIP 10: 36666 USDT (7050 USDT/día)</p>
+            <h3 id="vipStatus">Estado VIP: Desconocido</h3>
+            <button onclick="actualizarEstadoVIP()">Actualizar Estado VIP</button>
         </div>
     </div>
 
     <div class="navbar">
-        <a href="https://chainmaster.srv754054.hstgr.cloud/index.html"><i class="ph-house"></i>Inicio</a>
-        <a href="vip.html"><i class="ph-crown"></i>VIP</a>
-        <a href="https://chainmaster.srv754054.hstgr.cloud/quantify.html"><i class="ph-coin"></i>Cuantificar</a>
-        <a href="https://chainmaster.srv754054.hstgr.cloud/referrals.php"><i class="ph-users"></i>Referidos</a>
-        <a href="https://chainmaster.srv754054.hstgr.cloud/profile.html"><i class="ph-user"></i>Perfil</a>
-        <a href="vip.html#" onclick="logout()"><i class="ph-sign-out"></i>Cerrar Sesión</a>
+        <a href="index.html">Inicio</a>
+        <a href="vip.html">VIP</a>
+        <a href="perfil.html">Perfil</a>
+        <a href="#" onclick="cerrarSesion()">Cerrar Sesión</a>
     </div>
 
     <script>
-        let lang = 'es';
-        let user = null;
-        let loadAttempts = 0;
-        const maxAttempts = 3;
-
-        const languages = {
-            es: {
-                welcome: '¡Bienvenido a ChainMaster!',
-                logoutSuccess: 'Sesión cerrada. ¡Hasta pronto!',
-                loginRequired: 'Por favor, inicia sesión para ver tu nivel VIP.',
-                refreshRequired: 'Tu nivel VIP ha sido actualizado. Por favor, recarga la página o inicia sesión nuevamente.',
-                refreshSuccess: 'Datos cargados con éxito.',
-                loadingError: 'Error al cargar los datos. Intentando de nuevo...',
-                maxAttemptsReached: 'Error al cargar los datos después de varios intentos. Por favor, recarga la página manualmente.'
-            }
-        };
-
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.textContent = message;
-            notification.style.position = 'fixed';
-            notification.style.top = '10px';
-            notification.style.right = '10px';
-            notification.style.background = '#00CC00';
-            notification.style.color = 'white';
-            notification.style.padding = '10px';
-            notification.style.borderRadius = '5px';
-            notification.style.zIndex = '1000';
-            notification.style.opacity = '0';
-            document.body.appendChild(notification);
-            setTimeout(() => {
-                notification.style.opacity = '1';
-            }, 10);
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    notification.remove();
-                }, 500);
-            }, 4500);
+        function actualizarEstadoVIP() {
+            document.getElementById('vipStatus').textContent = 'Eres VIP-1';
         }
 
-        function loadUser() {
-            const userData = localStorage.getItem('chainmaster_user');
-            console.log('Datos en localStorage al cargar vip.html:', userData);
-            if (userData) {
-                try {
-                    user = JSON.parse(userData);
-                    if (user && user.email) {
-                        user.email = user.email.trim().toLowerCase();
-                        console.log('Email cargado desde localStorage:', user.email);
-                        refreshUserData();
-                    } else {
-                        console.log('No email found in localStorage, clearing storage');
-                        localStorage.removeItem('chainmaster_user');
-                        showNotification(languages[lang].loginRequired);
-                        $('#vipStatus').text('Eres VIP-0');
-                        setTimeout(() => {
-                            window.location.href = 'https://chainmaster.srv754054.hstgr.cloud/index.html';
-                        }, 2000);
-                    }
-                } catch (e) {
-                    console.error('Error parsing user data:', e);
-                    console.log('Clearing localStorage due to parsing error');
-                    localStorage.removeItem('chainmaster_user');
-                    showNotification(languages[lang].loginRequired);
-                    $('#vipStatus').text('Eres VIP-0');
-                    setTimeout(() => {
-                        window.location.href = 'https://chainmaster.srv754054.hstgr.cloud/index.html';
-                    }, 2000);
-                }
-            } else {
-                console.log('No user data in localStorage, redirecting to login');
-                showNotification(languages[lang].loginRequired);
-                $('#vipStatus').text('Eres VIP-0');
-                setTimeout(() => {
-                    window.location.href = 'https://chainmaster.srv754054.hstgr.cloud/index.html';
-                }, 2000);
-            }
-        }
-
-        function refreshUserData() {
-            if (user && user.email && loadAttempts < maxAttempts) {
-                loadAttempts++;
-                console.log('Intentando refrescar datos para email:', user.email);
-                $.ajax({
-                    url: 'get_user_data.php',
-                    method: 'POST',
-                    data: { email: user.email },
-                    dataType: 'json',
-                    timeout: 5000, // 5 segundos de timeout
-                    success: function(response) {
-                        console.log('Respuesta de get_user_data.php:', response);
-                        if (response.success) {
-                            user = response.user;
-                            if (!user.email) {
-                                user.email = user.email; // Asegurarse de mantener el email
-                            }
-                            localStorage.setItem('chainmaster_user', JSON.stringify(user));
-                            console.log('Datos actualizados en localStorage después de refresh:', localStorage.getItem('chainmaster_user'));
-                            showNotification(languages[lang].refreshSuccess);
-                            updateVipStatus();
-                            loadAttempts = 0; // Resetear intentos
-                        } else {
-                            console.error('Error en la respuesta:', response.message);
-                            showNotification(response.message || languages[lang].loadingError);
-                            if (loadAttempts < maxAttempts) {
-                                setTimeout(refreshUserData, 2000); // Reintentar después de 2 segundos
-                            }
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error AJAX:', xhr.status, xhr.statusText, xhr.responseText, status, error);
-                        showNotification(languages[lang].loadingError + ' (Intento ' + loadAttempts + ' de ' + maxAttempts + ') - Detalle: ' + status + ' - ' + error);
-                        if (loadAttempts < maxAttempts) {
-                            setTimeout(refreshUserData, 2000); // Reintentar después de 2 segundos
-                        } else {
-                            showNotification(languages[lang].maxAttemptsReached + ' (Último error: ' + status + ' - ' + error + ')');
-                            $('#vipStatus').text('Eres VIP-0 (Error al cargar)');
-                            setTimeout(() => {
-                                window.location.href = 'https://chainmaster.srv754054.hstgr.cloud/index.html';
-                            }, 2000);
-                        }
-                    }
-                });
-            } else {
-                console.log('No email found for refresh, redirecting to login');
-                showNotification(languages[lang].loginRequired);
-                $('#vipStatus').text('Eres VIP-0');
-                setTimeout(() => {
-                    window.location.href = 'https://chainmaster.srv754054.hstgr.cloud/index.html';
-                }, 2000);
-            }
-        }
-
-        function updateVipStatus() {
-            if (user && user.vip) {
-                $('#vipStatus').text(`Eres VIP-${user.vipLevel} (Ganancia Diaria: ${user.daily_earnings} USDT)`);
-            } else {
-                $('#vipStatus').text('Eres VIP-0');
-            }
-        }
-
-        function logout() {
-            console.log('Intentando cerrar sesión');
-            localStorage.removeItem('chainmaster_user');
-            user = null;
-            showNotification(languages[lang].logoutSuccess);
-            setTimeout(() => {
-                console.log('Redirigiendo a index.html');
-                window.location.href = 'https://chainmaster.srv754054.hstgr.cloud/index.html';
-            }, 1000);
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            loadUser();
-            initParticles();
-        });
-
-        function initParticles() {
-            const canvas = document.getElementById('particles');
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            const particlesArray = [];
-            const numberOfParticles = 50;
-
-            class Particle {
-                constructor() {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height;
-                    this.size = Math.random() * 5 + 1;
-                    this.speedX = Math.random() * 1 - 0.5;
-                    this.speedY = Math.random() * 1 - 0.5;
-                }
-                update() {
-                    this.x += this.speedX;
-                    this.y += this.speedY;
-                    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-                    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-                }
-                draw() {
-                    ctx.fillStyle = 'rgba(0, 204, 0, 0.5)';
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            for (let i = 0; i < numberOfParticles; i++) {
-                particlesArray.push(new Particle());
-            }
-
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for (let i = 0; i < particlesArray.length; i++) {
-                    particlesArray[i].update();
-                    particlesArray[i].draw();
-                }
-                requestAnimationFrame(animate);
-            }
-            animate();
+        function cerrarSesion() {
+            localStorage.removeItem('usuarioVIP');
+            alert('Sesión cerrada');
+            window.location.href = 'index.html';
         }
     </script>
 </body>
 </html>
+
